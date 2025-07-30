@@ -232,9 +232,10 @@ export type AnalysisId = string;
 export type AgentId = string;
 export type MessageId = string;
 export type CapabilityId = string;
+export type ProjectId = string;
 
 export type MemoryType = 'conversation' | 'solution' | 'pattern' | 'error' | 'insight' | 'context';
-export type MemorySource = 'user_input' | 'execution_result' | 'learning_system' | 'external_api';
+export type MemorySource = 'user_input' | 'execution_result' | 'learning_system' | 'external_api' | 'system';
 export type ValidationStatus = 'pending' | 'validated' | 'rejected' | 'expired';
 export type RelationshipType = 'similar' | 'related' | 'prerequisite' | 'consequence' | 'alternative';
 
@@ -292,4 +293,127 @@ export interface ResponseMetadata {
   timestamp: Date;
   version: string;
   requestId: string;
+}
+
+// ============================================================================
+// MISSING INTERFACE DEFINITIONS
+// ============================================================================
+
+export interface EnvironmentSpec {
+  runtime?: string;
+  packages?: string[];
+  timeout?: number;
+  memoryLimit?: string;
+  envVars?: Record<string, string>;
+}
+
+export interface EnvironmentInfo {
+  runtime: string;
+  packages: Record<string, string>;
+  version: string;
+}
+
+export interface ExecutionIssue {
+  type: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  details?: string;
+}
+
+export interface ExecutionRecommendation {
+  type: string;
+  message: string;
+  confidence: number;
+}
+
+export interface LearningContext {
+  projectId?: string;
+  agentId?: string;
+  sessionId?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface PatternExample {
+  code: string;
+  context: string;
+  outcome: string;
+}
+
+export interface PatternMetadata {
+  language?: SupportedLanguage;
+  framework?: string;
+  complexity: number;
+  tags: string[];
+}
+
+export interface RiskFactor {
+  factor: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  probability: number;
+  description: string;
+}
+
+export interface PredictionRecommendation {
+  type: string;
+  suggestion: string;
+  confidence: number;
+  impact: string;
+}
+
+export interface SimilarPattern {
+  patternId: PatternId;
+  similarity: number;
+  successRate: number;
+  description: string;
+}
+
+export interface ProjectStructure {
+  totalFiles: number;
+  codeFiles: number;
+  testFiles: number;
+  configFiles: number;
+  directories: number;
+}
+
+export interface ProjectMetrics {
+  linesOfCode: number;
+  complexity: {
+    average: number;
+    max: number;
+    distribution: Record<string, number>;
+  };
+  testCoverage: number;
+  maintainabilityIndex: number;
+}
+
+export interface ProjectRecommendation {
+  type: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  action?: string;
+}
+
+export interface DependencyGraph {
+  nodes: DependencyNode[];
+  edges: DependencyEdge[];
+}
+
+export interface DependencyNode {
+  id: string;
+  name: string;
+  version: string;
+  type: 'direct' | 'dev' | 'peer';
+}
+
+export interface DependencyEdge {
+  from: string;
+  to: string;
+  type: 'requires' | 'optional';
+}
+
+export interface CapabilityMetrics {
+  accuracy: number;
+  performance: number;
+  reliability: number;
+  lastUpdated: Date;
 }

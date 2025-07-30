@@ -154,11 +154,12 @@ export class AgentOS {
     }
     
     // Enhance request with context
-    const enhancedRequest = {
+    const enhancedRequest: ExecutionRequest = {
       ...request,
       context: {
         ...request.context,
         projectId: request.context?.projectId || this.config.projectId,
+        purpose: request.context?.purpose || 'verification',
         metadata: {
           ...request.context?.metadata,
           agentId: this.config.agentId

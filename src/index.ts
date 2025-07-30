@@ -3,6 +3,8 @@
  * Main entry point for the AgentOS library
  */
 
+import { AgentOS } from './core/AgentOS';
+
 export { AgentOS, AgentOSConfig } from './core/AgentOS';
 export { MemoryEngine } from './core/MemoryEngine';
 export { ExecutionEngine } from './core/ExecutionEngine';

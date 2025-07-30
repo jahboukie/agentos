@@ -78,3 +78,9 @@ agentos-memory.db
 # Temporary files
 tmp/
 temp/
+
+# AntiGoldfishMode
+.codecontext/
+
+# AntiGoldfishMode
+.antigoldfishmode/
