@@ -227,22 +227,26 @@ export class MemoryEngine {
     try {
       let sql = `
         SELECT m.*, 
-               COALESCE(fts.rank, 0) as fts_score,
+               CASE 
+                 WHEN m.content LIKE ? THEN 1.0
+                 WHEN m.context LIKE ? THEN 0.8
+                 ELSE 0.5 
+               END as match_score,
                CASE 
                  WHEN m.context = ? THEN 1.0 
                  ELSE 0.5 
                END as context_match_score
         FROM memories m
-        LEFT JOIN memories_fts fts ON m.id = fts.id
         WHERE 1=1
       `;
       
-      const params: any[] = [query.context?.[0] || ''];
+      const searchTerm = query.query ? `%${query.query}%` : '%';
+      const params: any[] = [searchTerm, searchTerm, query.context?.[0] || ''];
       
       // Add search conditions
       if (query.query) {
-        sql += ` AND fts.memories_fts MATCH ?`;
-        params.push(query.query);
+        sql += ` AND (m.content LIKE ? OR m.context LIKE ?)`;
+        params.push(`%${query.query}%`, `%${query.query}%`);
       }
       
       if (query.context && query.context.length > 0) {
@@ -277,7 +281,7 @@ export class MemoryEngine {
       
       // Order by relevance
       sql += ` ORDER BY 
-                 (fts_score * 0.4 + 
+                 (match_score * 0.4 + 
                   context_match_score * 0.3 + 
                   m.relevance_score * 0.2 + 
                   m.importance * 0.1) DESC`;
@@ -303,7 +307,7 @@ export class MemoryEngine {
         
         const searchResult: SearchResult = {
           memory,
-          matchScore: row.fts_score || 0,
+          matchScore: row.match_score || 0,
           relevanceScore: row.relevance_score,
           contextMatch: row.context_match_score > 0.9,
           highlights: this.extractHighlights(memory.content, query.query || '')

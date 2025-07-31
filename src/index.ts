@@ -8,6 +8,7 @@ import { AgentOS } from './core/AgentOS';
 export { AgentOS, AgentOSConfig } from './core/AgentOS';
 export { MemoryEngine } from './core/MemoryEngine';
 export { ExecutionEngine } from './core/ExecutionEngine';
+export { LearningEngine } from './core/LearningEngine';
 
 // Export all types
 export * from './types';

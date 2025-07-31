@@ -5,10 +5,12 @@
 
 import { MemoryEngine } from './MemoryEngine';
 import { ExecutionEngine } from './ExecutionEngine';
+import { LearningEngine } from './LearningEngine';
 import { 
   Memory, 
   MemoryQuery, 
   ExecutionRequest, 
+  CodeSuggestion,
   ApiResponse,
   AgentId,
   ProjectId 
@@ -26,6 +28,7 @@ export interface AgentOSConfig {
 export class AgentOS {
   private memoryEngine: MemoryEngine;
   private executionEngine: ExecutionEngine;
+  private learningEngine: LearningEngine;
   private config: Required<AgentOSConfig>;
   private initialized: boolean = false;
 
@@ -41,6 +44,7 @@ export class AgentOS {
 
     this.memoryEngine = new MemoryEngine(this.config.memoryDbPath);
     this.executionEngine = new ExecutionEngine();
+    this.learningEngine = new LearningEngine();
   }
 
   /**
@@ -270,9 +274,9 @@ export class AgentOS {
   }
 
   /**
-   * Learn from execution outcomes
+   * Predict success probability for code suggestion using Learning Engine
    */
-  async learn(data: any): Promise<ApiResponse<any>> {
+  async predictSuccess(suggestion: CodeSuggestion): Promise<ApiResponse<any>> {
     this.ensureInitialized();
     
     if (!this.config.enableLearning) {
@@ -285,30 +289,77 @@ export class AgentOS {
       };
     }
     
-    // Store learning data as memory
-    await this.remember({
-      content: `Learning data: ${JSON.stringify(data).substring(0, 200)}...`,
-      context: 'learning',
-      type: 'pattern',
-      metadata: {
-        agentId: this.config.agentId,
-        projectId: this.config.projectId,
-        tags: ['learning', 'pattern-recognition'],
-        source: 'learning_system',
-        confidence: 0.8,
-        validation: 'pending',
-        importance: 0.9,
-        category: 'learning'
-      },
-      relationships: []
-    });
+    return await this.learningEngine.predictSuccess(suggestion);
+  }
+
+  /**
+   * Learn from execution outcomes - Enhanced with Learning Engine
+   */
+  async learnFromExecution(suggestion: CodeSuggestion, execution: any): Promise<ApiResponse<any>> {
+    this.ensureInitialized();
+    
+    if (!this.config.enableLearning) {
+      return {
+        success: false,
+        error: {
+          code: 'LEARNING_DISABLED',
+          message: 'Learning is disabled in this AgentOS instance'
+        }
+      };
+    }
+    
+    // Use Learning Engine to learn from execution result
+    const learningResult = await this.learningEngine.learnFromExecution(suggestion, execution);
+    
+    // Store learning outcome as memory for future reference
+    if (learningResult.success) {
+      await this.remember({
+        content: `Learned from ${suggestion.language} code execution: ${execution.status}`,
+        context: 'learning',
+        type: 'pattern',
+        metadata: {
+          agentId: this.config.agentId,
+          projectId: this.config.projectId,
+          tags: ['learning', 'pattern-recognition', suggestion.language, execution.status],
+          source: 'learning_system',
+          confidence: 0.9,
+          validation: 'validated',
+          importance: 0.9,
+          category: 'learning'
+        },
+        relationships: []
+      });
+    }
+    
+    return learningResult;
+  }
+
+  /**
+   * Get learning engine statistics
+   */
+  async getLearningStats(): Promise<ApiResponse<any>> {
+    this.ensureInitialized();
+    
+    if (!this.config.enableLearning) {
+      return {
+        success: false,
+        error: {
+          code: 'LEARNING_DISABLED',
+          message: 'Learning is disabled in this AgentOS instance'
+        }
+      };
+    }
+    
+    const stats = this.learningEngine.getStats();
     
     return {
       success: true,
-      data: {
-        learned: true,
-        patterns: [],
-        improvements: []
+      data: stats,
+      meta: {
+        processingTime: Date.now(),
+        timestamp: new Date(),
+        version: '1.0.0',
+        requestId: this.generateRequestId()
       }
     };
   }
