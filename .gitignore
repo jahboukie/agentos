@@ -84,3 +84,5 @@ temp/
 
 # AntiGoldfishMode
 .antigoldfishmode/
+*.db-shm
+*.db-wal
