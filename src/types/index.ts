@@ -235,7 +235,7 @@ export type CapabilityId = string;
 export type ProjectId = string;
 
 export type MemoryType = 'conversation' | 'solution' | 'pattern' | 'error' | 'insight' | 'context';
-export type MemorySource = 'user_input' | 'execution_result' | 'learning_system' | 'external_api' | 'system';
+export type MemorySource = 'user_input' | 'execution_result' | 'learning_system' | 'external_api' | 'system' | 'cli' | 'workflow_cli';
 export type ValidationStatus = 'pending' | 'validated' | 'rejected' | 'expired';
 export type RelationshipType = 'similar' | 'related' | 'prerequisite' | 'consequence' | 'alternative';
 
